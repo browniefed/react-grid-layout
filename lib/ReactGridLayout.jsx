@@ -47,6 +47,7 @@ var ReactGridLayout = React.createClass({
     //
     isDraggable: React.PropTypes.bool,
     isResizable: React.PropTypes.bool,
+    isCompactable: React.PropTypes.bool,
     // Use CSS transforms instead of top/left
     useCSSTransforms: React.PropTypes.bool,
 
@@ -89,6 +90,7 @@ var ReactGridLayout = React.createClass({
       margin: [10, 10],
       isDraggable: true,
       isResizable: true,
+      isCompactable: true,
       useCSSTransforms: true,
       onLayoutChange: function(){}
     };
@@ -169,7 +171,7 @@ var ReactGridLayout = React.createClass({
     layout = utils.moveElement(layout, l, x, y, true /* isUserAction */);
 
     this.setState({
-      layout: utils.compact(layout),
+      layout: this.processCompactLayout(layout),
       activeDrag: activeDrag
     });
   },
@@ -203,11 +205,11 @@ var ReactGridLayout = React.createClass({
     };
     
     // Re-compact the layout and set the drag placeholder.
-    this.setState({layout: utils.compact(layout), activeDrag: activeDrag});
+    this.setState({layout: this.processCompactLayout(layout), activeDrag: activeDrag});
   },
 
   onResizeStop(e, {element, position}) {
-    this.setState({activeDrag: null, layout: utils.compact(this.state.layout)});
+    this.setState({activeDrag: null, layout: this.processCompactLayout(this.state.layout)});
   },
 
   /**
@@ -240,6 +242,14 @@ var ReactGridLayout = React.createClass({
     );
   },
 
+  /**
+   * Given a layout determine if the grid cells should be compacted
+   * @param  {Array} layout Layout.
+   * @return {Array}       Return a layout
+   */
+  processCompactLayout(layout) {
+    return this.props.isCompactable ? utils.compact(layout) : layout;
+  },
   /**
    * Given a grid item, set its style attributes & surround in a <Draggable>.
    * @param  {Element} child React element.
