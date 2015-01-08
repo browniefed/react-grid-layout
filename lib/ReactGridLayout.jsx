@@ -57,7 +57,16 @@ var ReactGridLayout = React.createClass({
     // Callback so you can save the layout.
     // Calls back with (currentLayout, allLayouts). allLayouts are keyed by breakpoint.
     onLayoutChange: React.PropTypes.func,
-
+    // Calls when drag starts, allows for canceling/restricting drag
+    onDragStart: React.PropTypes.func,
+    // Calls on each drag movement, allows for modifying current drag layout, or preventing layout modificaiton
+    onDrag: React.PropTypes.func,
+    // Cals when drag is complete
+    onDragStop: React.PropTypes.func,
+    // Calls when resize starts, allows to cancel/restrict resize
+    onResize: React.PropTypes.func,
+    // Calls when resize is complete
+    onResizeStop: React.PropTypes.func,
 
     //
     // Other validations
@@ -90,7 +99,12 @@ var ReactGridLayout = React.createClass({
       isDraggable: true,
       isResizable: true,
       useCSSTransforms: true,
-      onLayoutChange: function(){}
+      onLayoutChange: function(){},
+      onDragStart: function() {},
+      onDrag: function() {},
+      onDragStop: function() {},
+      onResize: function() {},
+      onResizeStop: function() {}
     };
   },
 
@@ -152,11 +166,33 @@ var ReactGridLayout = React.createClass({
     this.setState({width: width});
   },
 
-  onDragStart(i, e, {element, position}) {
-    // nothing
+  /**
+   * When dragging starts
+   * @param {Number} i Index of the child
+   * @param {Number} x X position of the move
+   * @param {Number} y Y position of the move
+   * @param {Element} element The current dragging DOM element
+   * @param {Object} position Drag information
+   */
+  onDragStart(i, x, y, {e, element, position}) {
+    var layout = this.state.layout;
+    var l = utils.getLayoutItem(layout, i);
+    if (this.props.onDragStart(layout, this.state.layout, l, null, {e, element, position}) === false) {
+        //TODO: Somehow prevent drag?
+        this.setState({
+            activeDrag: null
+        });
+    }
   },
-
-  onDrag(i, x, y) {
+  /**
+   * Each drag movement create a new dragelement and move the element to the dragged location
+   * @param {Number} i Index of the child
+   * @param {Number} x X position of the move
+   * @param {Number} y Y position of the move
+   * @param {Element} element The current dragging DOM element
+   * @param {Object} position Drag information   
+   */
+  onDrag(i, x, y, {e, element, position}) {
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
 
@@ -164,9 +200,13 @@ var ReactGridLayout = React.createClass({
     var activeDrag = {
       w: l.w, h: l.h, x: l.x, y: l.y, placeholder: true, i: i
     };
-    
+
     // Move the element to the dragged location.
     layout = utils.moveElement(layout, l, x, y, true /* isUserAction */);
+
+    //Ask users for a new layout if they need to process
+    layout = this.props.onDrag(layout, this.state.layout, l, activeDrag, {e, element, position}) || layout;
+
 
     this.setState({
       layout: utils.compact(layout),
@@ -177,19 +217,27 @@ var ReactGridLayout = React.createClass({
   /**
    * When dragging stops, figure out which position the element is closest to and update its x and y.
    * @param  {Number} i Index of the child.
-   * @param  {Event}  e DOM Event.
+   * @param {Number} i Index of the child
+   * @param {Number} x X position of the move
+   * @param {Number} y Y position of the move
+   * @param {Element} element The current dragging DOM element
+   * @param {Object} position Drag information
    */
-  onDragStop(i, x, y) {
+  onDragStop(i, x, y, {e, element, position}) {
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
 
     // Move the element here
     layout = utils.moveElement(layout, l, x, y, true /* isUserAction */);
+
+    //Ask users for a new layout if they need to process
+    layout = this.props.onDragStop(layout, this.state.layout, l, activeDrag, {e, element, position}) || layout;
+
     // Set state
     this.setState({layout: utils.compact(layout), activeDrag: null});
   },
 
-  onResize(i, w, h) {
+  onResize(i, w, h, {e, element, size}) {
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
 
@@ -201,13 +249,20 @@ var ReactGridLayout = React.createClass({
     var activeDrag = {
       w: w, h: h, x: l.x, y: l.y, placeholder: true, i: i
     };
+
+    activeDrag = this.props.onResize(layout, layout, l, activeDrag, {e, element, size}) || activeDrag;
     
     // Re-compact the layout and set the drag placeholder.
     this.setState({layout: utils.compact(layout), activeDrag: activeDrag});
   },
 
-  onResizeStop(e, {element, position}) {
-    this.setState({activeDrag: null, layout: utils.compact(this.state.layout)});
+  onResizeStop(i, x, y, {e, element, size}) {
+    var layout = this.state.layout;
+    var l = utils.getLayoutItem(layout, i);
+        
+    layout = this.props.onResizeStop(layout, layout, l, null, {e, element, size}) || layout;
+
+    this.setState({activeDrag: null, layout: utils.compact(layout)});
   },
 
   /**
