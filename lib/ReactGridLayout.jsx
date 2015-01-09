@@ -63,7 +63,9 @@ var ReactGridLayout = React.createClass({
     onDrag: React.PropTypes.func,
     // Cals when drag is complete
     onDragStop: React.PropTypes.func,
-    // Calls when resize starts, allows to cancel/restrict resize
+    //Cals when resize starts, allows for canceling
+    onResizeStart: React.PropTypes.func,
+    // Calls when resize movement happens, restrict resize
     onResize: React.PropTypes.func,
     // Calls when resize is complete
     onResizeStop: React.PropTypes.func,
@@ -103,6 +105,7 @@ var ReactGridLayout = React.createClass({
       onDragStart: function() {},
       onDrag: function() {},
       onDragStop: function() {},
+      onResizeStart: function() {},
       onResize: function() {},
       onResizeStop: function() {}
     };
@@ -231,10 +234,17 @@ var ReactGridLayout = React.createClass({
     layout = utils.moveElement(layout, l, x, y, true /* isUserAction */);
 
     //Ask users for a new layout if they need to process
-    layout = this.props.onDragStop(layout, this.state.layout, l, activeDrag, {e, element, position}) || layout;
+    layout = this.props.onDragStop(layout, this.state.layout, l, null, {e, element, position}) || layout;
 
     // Set state
     this.setState({layout: utils.compact(layout), activeDrag: null});
+  },
+
+  onResizeStart(i, w, h, {e, element, size}) {
+    var layout = this.state.layout;
+    var l = utils.getLayoutItem(layout, i);
+
+    this.props.onResizeStart(layout, layout, l, null, {e, element, size});
   },
 
   onResize(i, w, h, {e, element, size}) {
@@ -321,6 +331,7 @@ var ReactGridLayout = React.createClass({
         onDragStop={this.onDragStop}
         onDragStart={this.onDragStart}
         onDrag={this.onDrag}
+        onResizeStart={this.onResizeStart}
         onResize={this.onResize}
         onResizeStop={this.onResizeStop}
         isDraggable={l.static ? false : this.props.isDraggable}

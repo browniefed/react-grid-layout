@@ -76,7 +76,9 @@ var ReactGridLayout = React.createClass({
     onDrag: React.PropTypes.func,
     // Cals when drag is complete
     onDragStop: React.PropTypes.func,
-    // Calls when resize starts, allows to cancel/restrict resize
+    //Cals when resize starts, allows for canceling
+    onResizeStart: React.PropTypes.func,
+    // Calls when resize movement happens, restrict resize
     onResize: React.PropTypes.func,
     // Calls when resize is complete
     onResizeStop: React.PropTypes.func,
@@ -118,6 +120,7 @@ var ReactGridLayout = React.createClass({
       onDragStart: function () {},
       onDrag: function () {},
       onDragStop: function () {},
+      onResizeStart: function () {},
       onResize: function () {},
       onResizeStop: function () {}
     };
@@ -255,16 +258,26 @@ var ReactGridLayout = React.createClass({
     layout = utils.moveElement(layout, l, x, y, true /* isUserAction */);
 
     //Ask users for a new layout if they need to process
-    layout = this.props.onDragStop(layout, this.state.layout, l, activeDrag, { e: e, element: element, position: position }) || layout;
+    layout = this.props.onDragStop(layout, this.state.layout, l, null, { e: e, element: element, position: position }) || layout;
 
     // Set state
     this.setState({ layout: utils.compact(layout), activeDrag: null });
   },
 
-  onResize: function onResize(i, w, h, _ref4) {
+  onResizeStart: function onResizeStart(i, w, h, _ref4) {
     var e = _ref4.e;
     var element = _ref4.element;
     var size = _ref4.size;
+    var layout = this.state.layout;
+    var l = utils.getLayoutItem(layout, i);
+
+    this.props.onResizeStart(layout, layout, l, null, { e: e, element: element, size: size });
+  },
+
+  onResize: function onResize(i, w, h, _ref5) {
+    var e = _ref5.e;
+    var element = _ref5.element;
+    var size = _ref5.size;
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
 
@@ -283,10 +296,10 @@ var ReactGridLayout = React.createClass({
     this.setState({ layout: utils.compact(layout), activeDrag: activeDrag });
   },
 
-  onResizeStop: function onResizeStop(i, x, y, _ref5) {
-    var e = _ref5.e;
-    var element = _ref5.element;
-    var size = _ref5.size;
+  onResizeStop: function onResizeStop(i, x, y, _ref6) {
+    var e = _ref6.e;
+    var element = _ref6.element;
+    var size = _ref6.size;
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
 
@@ -351,6 +364,7 @@ var ReactGridLayout = React.createClass({
         onDragStop: this.onDragStop,
         onDragStart: this.onDragStart,
         onDrag: this.onDrag,
+        onResizeStart: this.onResizeStart,
         onResize: this.onResize,
         onResizeStop: this.onResizeStop,
         isDraggable: l["static"] ? false : this.props.isDraggable,
