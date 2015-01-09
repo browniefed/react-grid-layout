@@ -181,6 +181,18 @@ listenToWindowResize: React.PropTypes.bool,
 // Callback so you can save the layout.
 // Calls back with (currentLayout, allLayouts). allLayouts are keyed by breakpoint.
 onLayoutChange: React.PropTypes.func,
+// Calls when drag starts, allows for canceling/restricting drag    
+onDragStart: React.PropTypes.func,
+// Calls on each drag movement, allows for modifying current drag layout, or preventing layout modificaiton
+onDrag: React.PropTypes.func,
+// Calls when drag is complete
+onDragStop: React.PropTypes.func,
+//Calls when resize starts, allows for canceling
+onResizeStart: React.PropTypes.func,
+// Calls when resize movement happens, restrict resize
+onResize: React.PropTypes.func,
+// Calls when resize is complete
+onResizeStop: React.PropTypes.func
 ```
 
 #### Responsive Grid Layout Props

@@ -61,9 +61,9 @@ var ReactGridLayout = React.createClass({
     onDragStart: React.PropTypes.func,
     // Calls on each drag movement, allows for modifying current drag layout, or preventing layout modificaiton
     onDrag: React.PropTypes.func,
-    // Cals when drag is complete
+    // Calls when drag is complete
     onDragStop: React.PropTypes.func,
-    //Cals when resize starts, allows for canceling
+    //Calls when resize starts, allows for canceling
     onResizeStart: React.PropTypes.func,
     // Calls when resize movement happens, restrict resize
     onResize: React.PropTypes.func,
