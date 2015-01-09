@@ -174,24 +174,22 @@ var ReactGridLayout = React.createClass({
    * @param {Number} i Index of the child
    * @param {Number} x X position of the move
    * @param {Number} y Y position of the move
+   * @param {Event} e The mousedown event
    * @param {Element} element The current dragging DOM element
    * @param {Object} position Drag information
    */
   onDragStart(i, x, y, {e, element, position}) {
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
-    if (this.props.onDragStart(layout, this.state.layout, l, null, {e, element, position}) === false) {
-        //TODO: Somehow prevent drag?
-        this.setState({
-            activeDrag: null
-        });
-    }
+
+    this.props.onDragStart(layout, this.state.layout, l, null, {e, element, position});
   },
   /**
    * Each drag movement create a new dragelement and move the element to the dragged location
    * @param {Number} i Index of the child
    * @param {Number} x X position of the move
    * @param {Number} y Y position of the move
+   * @param {Event} e The mousedown event
    * @param {Element} element The current dragging DOM element
    * @param {Object} position Drag information   
    */
@@ -223,6 +221,7 @@ var ReactGridLayout = React.createClass({
    * @param {Number} i Index of the child
    * @param {Number} x X position of the move
    * @param {Number} y Y position of the move
+   * @param {Event} e The mousedown event
    * @param {Element} element The current dragging DOM element
    * @param {Object} position Drag information
    */
