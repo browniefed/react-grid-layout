@@ -1,5 +1,4 @@
 "use strict";
-
 var _objectWithoutProperties = function (obj, keys) {
   var target = {};
 
@@ -74,15 +73,14 @@ var ReactGridLayout = React.createClass({
     onDragStart: React.PropTypes.func,
     // Calls on each drag movement, allows for modifying current drag layout, or preventing layout modificaiton
     onDrag: React.PropTypes.func,
-    // Cals when drag is complete
+    // Calls when drag is complete
     onDragStop: React.PropTypes.func,
-    //Cals when resize starts, allows for canceling
+    //Calls when resize starts, allows for canceling
     onResizeStart: React.PropTypes.func,
     // Calls when resize movement happens, restrict resize
     onResize: React.PropTypes.func,
     // Calls when resize is complete
     onResizeStop: React.PropTypes.func,
-
 
     //
     // Other validations
@@ -126,7 +124,7 @@ var ReactGridLayout = React.createClass({
     };
   },
 
-  getInitialState: function () {
+  getInitialState: function getInitialState() {
     return {
       layout: utils.synchronizeLayoutWithChildren(this.props.layout, this.props.children, this.props.cols),
       width: this.props.initialWidth,
@@ -189,6 +187,7 @@ var ReactGridLayout = React.createClass({
    * @param {Number} i Index of the child
    * @param {Number} x X position of the move
    * @param {Number} y Y position of the move
+   * @param {Event} e The mousedown event
    * @param {Element} element The current dragging DOM element
    * @param {Object} position Drag information
    */
@@ -198,18 +197,15 @@ var ReactGridLayout = React.createClass({
     var position = _ref.position;
     var layout = this.state.layout;
     var l = utils.getLayoutItem(layout, i);
-    if (this.props.onDragStart(layout, this.state.layout, l, null, { e: e, element: element, position: position }) === false) {
-      //TODO: Somehow prevent drag?
-      this.setState({
-        activeDrag: null
-      });
-    }
+
+    this.props.onDragStart(layout, this.state.layout, l, null, { e: e, element: element, position: position });
   },
   /**
    * Each drag movement create a new dragelement and move the element to the dragged location
    * @param {Number} i Index of the child
    * @param {Number} x X position of the move
    * @param {Number} y Y position of the move
+   * @param {Event} e The mousedown event
    * @param {Element} element The current dragging DOM element
    * @param {Object} position Drag information   
    */
@@ -244,6 +240,7 @@ var ReactGridLayout = React.createClass({
    * @param {Number} i Index of the child
    * @param {Number} x X position of the move
    * @param {Number} y Y position of the move
+   * @param {Event} e The mousedown event
    * @param {Element} element The current dragging DOM element
    * @param {Object} position Drag information
    */
